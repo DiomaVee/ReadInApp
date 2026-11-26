@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">ReadIn</string>
+    <string name="search_books">Search books</string>
+    <string name="search">Search</string>
+    <string name="save">Save</string>
+    <string name="saved">Saved to your library</string>
+    <string name="no_results">No results found</string>
+    <string name="book_cover">Book cover</string>
+    <string name="add_book">Add %1$s to library</string>
+    <string name="library">Library</string>
+    <string name="discover">Discover</string>
+    <string name="private_library">Private</string>
+
+    //added
+    <string name="library_title">My Library</string>
+    <string name="empty_library">No books saved yet</string>
+    <string name="add_test_book">Add test book</string>
+
 </resources>

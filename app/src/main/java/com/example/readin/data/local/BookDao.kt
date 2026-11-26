@@ -3,6 +3,7 @@ package com.example.readin.data.local
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
+@Dao
 interface BookDao {
 
     @Insert

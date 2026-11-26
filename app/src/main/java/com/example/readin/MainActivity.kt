@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import com.example.readin.screens.DiscoverScreen
+import com.example.readin.screens.LibraryScreen
 import com.example.readin.ui.theme.ReadInTheme
 
 class MainActivity : ComponentActivity() {
@@ -27,7 +29,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ReadInTheme {
-                ReadInApp()
+                AppNavigation()
             }
         }
     }
