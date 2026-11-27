@@ -13,4 +13,9 @@ class BookRepository(private val bookDao: BookDao) {
     suspend fun saveBook(book: BookEntity){
         bookDao.insert(book)
     }
+
+    suspend fun deleteBook(book: BookEntity){
+        bookDao.delete(book)
+    }
+
 }

@@ -1,25 +1,34 @@
 package com.example.readin
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.readin.data.local.AppDatabase
 import com.example.readin.data.repository.BookRepository
+import com.example.readin.screens.BookDetailsScreen
 import com.example.readin.screens.DiscoverScreen
 import com.example.readin.screens.LibraryScreen
 import com.example.readin.viewmodel.BookViewModel
+import com.example.readin.viewmodel.LibraryViewModel
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
     val context = LocalContext.current.applicationContext
     val repository = BookRepository(AppDatabase.getDatabase(context).bookDao())
+    val libraryViewModel: LibraryViewModel = viewModel()
+    val books by libraryViewModel.books.collectAsState()
 
+    //Reference prompt (5)
     val bookViewModel: BookViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
@@ -44,6 +53,34 @@ fun AppNavigation() {
 
     NavHost(navController = navController, startDestination = "discover") {
         composable("discover") { DiscoverScreen(viewModel = bookViewModel, onNavigate = goTo) }
-        composable("library") { LibraryScreen(onNavigate = goTo) }
+        composable("library") {
+            LibraryScreen(
+                viewModel = libraryViewModel,
+                onNavigate = goTo,
+                onBookClick = { book ->
+                    navController.navigate("details/${book.isbn}")
+                }
+            )
+        }
+        composable(
+            route = "details/{isbn}",
+            arguments = listOf(navArgument("isbn") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val isbn = backStackEntry.arguments?.getInt("isbn")
+            val selectedBook = books.find { it.isbn == isbn }
+
+            if (selectedBook != null) {
+                BookDetailsScreen(
+                    book = selectedBook,
+                    onBack = { navController.popBackStack() },
+                    onRatingChange = { newRating ->
+                        libraryViewModel.updateRating(selectedBook, newRating)
+                    },
+                    onStatusChange = { newStatus ->
+                        libraryViewModel.updateStatus(selectedBook, newStatus)
+                    }
+                )
+            }
+        }
     }
 }

@@ -87,7 +87,7 @@ fun DiscoverScreen(
                                     .aspectRatio(2f / 3f)
                                     .clip(RoundedCornerShape(8.dp))
                             )
-                            // Reference prompt ()
+
                             FilledTonalIconButton(
                                 onClick = { viewModel.saveBook(book) },
                                 modifier = Modifier

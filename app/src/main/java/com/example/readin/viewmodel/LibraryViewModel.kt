@@ -1,6 +1,7 @@
 package com.example.readin.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,21 +20,41 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
     val books: StateFlow<List<BookEntity>> = dao.getPublicBooks()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // TEMPORARY: just so you can see the list working
-    fun addTestBook() {
+    fun deleteBook(book: BookEntity) {
         viewModelScope.launch {
-            dao.insert(
-                BookEntity(
-                    isbn = System.currentTimeMillis().toInt(),
-                    title = "Test Book",
-                    author = "Test Author",
-                    genre = "Fantasy",
-                    releaseYear = 2020,
-                    status = "Reading",
-                    rating = 4f,
-                    notes = ""
-                )
-            )
+            try{
+                dao.delete(book)
+            }
+            catch (e: Exception){
+                Log.e("BookDelete", "Failed to delete book", e)
+            }
         }
     }
+
+    fun updateRating(book: BookEntity, newRating: Float) {
+        viewModelScope.launch {
+            try{
+                if(book.status == "Finished") {
+                    dao.update(book.copy(rating = newRating))
+                }
+                else {
+                    Log.e("LibraryViewModel", "Cannot update rating for unfinished book")
+                }
+            }
+            catch(e: Exception){
+                Log.e("LibraryViewModel", "Failed to update rating", e)
+            }
+        }
+    }
+
+    fun updateStatus(book: BookEntity, newStatus: String) {
+        viewModelScope.launch {
+            try {
+                dao.update(book.copy(status = newStatus))
+            } catch (e: Exception) {
+                Log.e("LibraryViewModel", "Failed to update status", e)
+            }
+        }
+    }
+
 }

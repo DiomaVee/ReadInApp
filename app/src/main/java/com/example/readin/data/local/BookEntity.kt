@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "books")
 data class BookEntity(
-    @PrimaryKey(autoGenerate = true) val isbn: Int = 0,
+    @PrimaryKey() val isbn: Int = 0,
     val title: String,
     val author: String,
     val genre: String,
@@ -13,5 +13,6 @@ data class BookEntity(
     val status: String,
     val rating: Float,
     val notes: String,
-    val isPrivate: Boolean = false
+    val isPrivate: Boolean = false,
+    val coverUrl: String? = null
 )

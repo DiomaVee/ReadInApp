@@ -10,10 +10,17 @@
     <string name="library">Library</string>
     <string name="discover">Discover</string>
     <string name="private_library">Private</string>
-
-    //added
     <string name="library_title">My Library</string>
     <string name="empty_library">No books saved yet</string>
-    <string name="add_test_book">Add test book</string>
+    <string name="delete_book">Delete %1$s</string>
+    <string name="book_details">Book Details</string>
+    <string name="back">Back</string>
+    <string name="release_year_value">Released: %1$d</string>
+    <string name="unknown_year">Released: Unknown</string>
+    <string name="rating_value">Rating: %1$.1f / 5.0</string>
+    <string name="notes">Notes</string>
+    <string name="your_rating">Your Rating</string>
+    <string name="set_rating_stars">Rate %1$d out of 5 stars</string>
+    <string name="reading_status">Reading Status</string>
 
 </resources>

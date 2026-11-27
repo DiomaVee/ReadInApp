@@ -4,7 +4,6 @@ package com.example.readin.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.readin.data.local.BookDao
 import com.example.readin.data.local.BookEntity
 import com.example.readin.data.remote.BookItem
 import com.example.readin.data.repository.BookRepository
@@ -22,6 +21,8 @@ class BookViewModel(private val repository: BookRepository) : ViewModel() {
 
     private val _searched = MutableStateFlow(false)
     val searched: StateFlow<Boolean> = _searched
+
+
 
     fun searchBooks(query: String) {
         if (query.isBlank()) return
@@ -45,9 +46,14 @@ class BookViewModel(private val repository: BookRepository) : ViewModel() {
             ?.take(4)
             ?.toIntOrNull()
             ?: 0
-
+        val cover = info.imageLinks?.thumbnail?.replace("http://", "https://")
         val entity = BookEntity(
-            isbn = 0,
+            isbn = info.industryIdentifiers
+                ?.firstOrNull { it.type == "ISBN_13" || it.type == "ISBN_10" }
+                ?.identifier
+                ?.filter { it.isDigit() }
+                ?.toIntOrNull()
+                ?: item.id.hashCode(),
             title = info.title ?: "Untitled",
             author = info.authors?.joinToString(", ") ?: "Unknown Author",
             genre = info.categories?.firstOrNull() ?: "General",
@@ -55,7 +61,8 @@ class BookViewModel(private val repository: BookRepository) : ViewModel() {
             status = "To Read",
             rating = 0f,
             notes = "",
-            isPrivate = false
+            isPrivate = false,
+            coverUrl = cover
         )
 
         viewModelScope.launch {
