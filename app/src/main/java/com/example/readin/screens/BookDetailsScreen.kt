@@ -1,5 +1,6 @@
 package com.example.readin.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,8 +25,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material3.MenuAnchorType
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.text.style.TextOverflow
 
 private val readingStatuses = listOf("To Read", "Reading", "Finished")
 //Reference prompt (6)
@@ -35,7 +36,8 @@ fun BookDetailsScreen(
     book: BookEntity,
     onBack: () -> Unit = {},
     onRatingChange: (Float) -> Unit = {},
-    onStatusChange: (String) -> Unit = {}
+    onStatusChange: (String) -> Unit = {},
+    onNotesChange: (String) -> Unit = {}
 ) {
 
     Scaffold(
@@ -121,119 +123,202 @@ fun BookDetailsScreen(
                             contentDescription = null,
                             modifier = Modifier.size(18.dp)
                         )
-                        Text(
-                            text = stringResource(R.string.rating_value, book.rating),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-            }
-
-            if (book.notes.isNotBlank()) {
-                Spacer(Modifier.height(20.dp))
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(12.dp)) {
-                        Text(
-                            text = stringResource(R.string.notes),
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = book.notes,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                        book.googleRating?.let {
+                            Text(
+                                text = stringResource(R.string.rating_value, it),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
                 }
             }
 
             Spacer(Modifier.height(20.dp))
-
-            Text(
-                text = stringResource(R.string.reading_status),
-                style = MaterialTheme.typography.titleSmall
-            )
 
             //Reference Prompt (8)
             var statusMenuExpanded by remember { mutableStateOf(false) }
+            var isEditing by remember { mutableStateOf(false) }
 
-            ExposedDropdownMenuBox(
-                expanded = statusMenuExpanded,
-                onExpandedChange = { statusMenuExpanded = it },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                OutlinedTextField(
-                    value = book.status,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text(stringResource(R.string.reading_status)) },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = statusMenuExpanded)
-                    },
-                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                    modifier = Modifier
-                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                        .fillMaxWidth()
+            if(isEditing) {
+
+                Text(
+                    text = stringResource(R.string.reading_status),
+                    style = MaterialTheme.typography.titleSmall
                 )
 
-                ExposedDropdownMenu(
+                ExposedDropdownMenuBox(
                     expanded = statusMenuExpanded,
-                    onDismissRequest = { statusMenuExpanded = false }
+                    onExpandedChange = { statusMenuExpanded = it },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    readingStatuses.forEach { statusOption ->
-                        DropdownMenuItem(
-                            text = { Text(statusOption) },
-                            onClick = {
-                                onStatusChange(statusOption)
-                                statusMenuExpanded = false
-                            },
-                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                        )
-                    }
-                }
-            }
+                    OutlinedTextField(
+                        value = book.status,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(stringResource(R.string.reading_status)) },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = statusMenuExpanded)
+                        },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                        modifier = Modifier
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            .fillMaxWidth()
+                    )
 
-            //Reference Prompt (9)
-            Spacer(Modifier.height(20.dp))
-
-            Text(
-                text = stringResource(R.string.your_rating),
-                style = MaterialTheme.typography.titleSmall
-            )
-
-            Spacer(Modifier.height(20.dp))
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val currentStars = book.rating.toInt().coerceIn(0, 5)
-                for (star in 1..5) {
-                    IconButton(
-                        onClick = { onRatingChange(star.toFloat()) },
-                        modifier = Modifier.size(40.dp)
+                    ExposedDropdownMenu(
+                        expanded = statusMenuExpanded,
+                        onDismissRequest = { statusMenuExpanded = false }
                     ) {
-                        Icon(
-                            imageVector = if (star <= currentStars) {
-                                Icons.Default.Star
-                            } else {
-                                Icons.Outlined.Star
-                            },
-                            contentDescription = stringResource(R.string.set_rating_stars, star),
-                            tint = if (star <= currentStars) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            }
+                        readingStatuses.forEach { statusOption ->
+                            DropdownMenuItem(
+                                text = { Text(statusOption) },
+                                onClick = {
+                                    onStatusChange(statusOption)
+                                    statusMenuExpanded = false
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                            )
+                        }
+                    }
+                }
+
+                //Reference Prompt (9)
+                Spacer(Modifier.height(20.dp))
+
+                Text(
+                    text = stringResource(R.string.your_rating),
+                    style = MaterialTheme.typography.titleSmall
+                )
+
+                Spacer(Modifier.height(6.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val currentStars = book.rating.toInt().coerceIn(0, 5)
+                    for (star in 1..5) {
+                        IconButton(
+                            onClick = { onRatingChange(star.toFloat()) },
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (star <= currentStars) {
+                                    Icons.Default.Star
+                                } else {
+                                    Icons.Outlined.Star
+                                },
+                                contentDescription = stringResource(R.string.set_rating_stars, star),
+                                tint = if (star <= currentStars) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Text(
+                    text = stringResource(R.string.rating_value, book.rating),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                var notesText by remember(book.isbn, book.notes) { mutableStateOf(book.notes) }
+
+                Spacer(Modifier.height(20.dp))
+
+                Text(
+                    text = stringResource(R.string.notes),
+                    style = MaterialTheme.typography.titleSmall
+                )
+
+                Spacer(Modifier.height(6.dp))
+
+                OutlinedTextField(
+                    value = notesText,
+                    onValueChange = { notesText = it },
+                    label = { Text(stringResource(R.string.notes)) },
+                    minLines = 3,
+                    maxLines = 6,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                Button(
+                    onClick = { onNotesChange(notesText) },
+                    enabled = notesText != book.notes,
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text(stringResource(R.string.save))
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                Button(
+                    onClick = { isEditing = false },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Cancel Editing")
+                }
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Description",
+                            style = MaterialTheme.typography.titleSmall
                         )
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+
+                    var isExpanded by remember(book.isbn) { mutableStateOf(false) }
+                    var hasOverflow by remember(book.isbn) { mutableStateOf(false) }
+
+                    Text(
+                        text = book.description ?: "No description available.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = if (isExpanded) Int.MAX_VALUE else 10,
+                        overflow = TextOverflow.Ellipsis,
+                        onTextLayout = { textLayoutResult ->
+                            if (!isExpanded) {
+                                hasOverflow = textLayoutResult.hasVisualOverflow
+                            }
+                        },
+                        modifier = Modifier.align(Alignment.Start)
+                    )
+
+                    if (hasOverflow || isExpanded) {
+                        Text(
+                            text = if (isExpanded) "Show less" else "See more",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .align(Alignment.Start)
+                                .padding(top = 4.dp)
+                                .clickable { isExpanded = !isExpanded }
+                        )
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+
+                    Button(
+                        onClick = { isEditing = true },
+                        modifier = Modifier.align(Alignment.End)
+                    ) {
+                        Text("Edit Details")
                     }
                 }
             }
-
-            Text(
-                text = stringResource(R.string.rating_value, book.rating),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }

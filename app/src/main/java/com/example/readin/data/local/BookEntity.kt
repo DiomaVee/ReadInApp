@@ -12,7 +12,9 @@ data class BookEntity(
     val releaseYear: Int,
     val status: String,
     val rating: Float,
+    val googleRating: Double? = null,
     val notes: String,
     val isPrivate: Boolean = false,
-    val coverUrl: String? = null
+    val coverUrl: String? = null,
+    val description: String? = null
 )

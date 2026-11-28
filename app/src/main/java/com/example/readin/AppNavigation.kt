@@ -78,6 +78,9 @@ fun AppNavigation() {
                     },
                     onStatusChange = { newStatus ->
                         libraryViewModel.updateStatus(selectedBook, newStatus)
+                    },
+                    onNotesChange = { newNotes ->
+                        libraryViewModel.updateNotes(selectedBook, newNotes)
                     }
                 )
             }

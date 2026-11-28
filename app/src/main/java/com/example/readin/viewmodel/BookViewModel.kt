@@ -60,9 +60,11 @@ class BookViewModel(private val repository: BookRepository) : ViewModel() {
             releaseYear = year,
             status = "To Read",
             rating = 0f,
+            googleRating = info.averageRating,
             notes = "",
             isPrivate = false,
-            coverUrl = cover
+            coverUrl = cover,
+            description = info.description
         )
 
         viewModelScope.launch {

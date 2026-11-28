@@ -57,4 +57,14 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun updateNotes(book: BookEntity, newNotes: String) {
+        viewModelScope.launch {
+            try {
+                dao.update(book.copy(notes = newNotes))
+            } catch (e: Exception) {
+                Log.e("LibraryViewModel", "Failed to update notes", e)
+            }
+        }
+    }
+
 }

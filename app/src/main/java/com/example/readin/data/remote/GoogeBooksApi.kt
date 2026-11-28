@@ -13,7 +13,9 @@ data class VolumeInfo(
     val publishedDate: String? = null,
     val categories: List<String>? = null,
     val imageLinks: ImageLinks? = null,
-    val industryIdentifiers: List<Identifier>? = null
+    val industryIdentifiers: List<Identifier>? = null,
+    val averageRating: Double? = null,
+    val description: String? = null
 )
 data class ImageLinks(val thumbnail: String? = null)
 data class Identifier(val type: String, val identifier: String)
@@ -25,4 +27,5 @@ interface GoogleBooksApi {
         @Query("maxResults") maxResults: Int = 20,
         @Query("key") key: String = BuildConfig.BOOKS_API_KEY
     ): BooksResponse
+
 }
