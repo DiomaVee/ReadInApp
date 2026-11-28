@@ -3,6 +3,9 @@ package com.example.readin
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -13,8 +16,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.readin.data.local.AppDatabase
+import com.example.readin.data.local.BookEntity
 import com.example.readin.data.repository.BookRepository
 import com.example.readin.screens.BookDetailsScreen
+import com.example.readin.screens.DiscoveryDetailsScreen
 import com.example.readin.screens.DiscoverScreen
 import com.example.readin.screens.LibraryScreen
 import com.example.readin.viewmodel.BookViewModel
@@ -27,6 +32,8 @@ fun AppNavigation() {
     val repository = BookRepository(AppDatabase.getDatabase(context).bookDao())
     val libraryViewModel: LibraryViewModel = viewModel()
     val books by libraryViewModel.books.collectAsState()
+    val savedIsbns = remember(books) { books.map { it.isbn }.toSet() }
+    var selectedDiscoverBook by remember { mutableStateOf<BookEntity?>(null) }
 
     //Reference prompt (5)
     val bookViewModel: BookViewModel = viewModel(
@@ -51,8 +58,28 @@ fun AppNavigation() {
         }
     }
 
+    //Reference Prompt (11)
     NavHost(navController = navController, startDestination = "discover") {
-        composable("discover") { DiscoverScreen(viewModel = bookViewModel, onNavigate = goTo) }
+        composable("discover") {
+            DiscoverScreen(
+                viewModel = bookViewModel,
+                savedIsbns = savedIsbns,
+                onNavigate = goTo,
+                onBookClick = { book ->
+                    selectedDiscoverBook = book
+                    navController.navigate("discover_details")
+                }
+            )
+        }
+        composable("discover_details") {
+            val selectedBook = selectedDiscoverBook
+            if (selectedBook != null) {
+                DiscoveryDetailsScreen(
+                    book = selectedBook,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+        }
         composable("library") {
             LibraryScreen(
                 viewModel = libraryViewModel,

@@ -49,13 +49,22 @@ fun LibraryScreen(
             )
 
             if (books.isEmpty()) {
-                Text(stringResource(R.string.empty_library))
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ){
+                    Text(stringResource(R.string.empty_library))
+                }
             }
 
+            Spacer(Modifier.height(20.dp))
+
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                columns = GridCells.Fixed(3),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
                 items(books, key = { it.isbn }) { book ->
@@ -70,6 +79,7 @@ fun LibraryScreen(
                                 contentDescription = stringResource(R.string.book_cover),
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize()
+                                    .clip(RoundedCornerShape(8.dp))
 
                             )
                             FilledTonalIconButton(
